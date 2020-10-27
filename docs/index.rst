@@ -1,0 +1,5 @@
+===================
+collective.fancybox
+===================
+
+User documentation
