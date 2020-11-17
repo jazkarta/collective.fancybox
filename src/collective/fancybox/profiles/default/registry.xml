@@ -3,6 +3,29 @@
     xmlns:i18n="http://xml.zope.org/namespaces/i18n"
     i18n:domain="collective.fancybox">
 
-<!-- -*- extra stuff goes here -*- -->
+  <records interface="Products.CMFPlone.interfaces.resources.IResourceRegistry" prefix="plone.resources/fancybox">
+    <value key="css">
+	    <element>++plone++collective.fancybox/jquery.fancybox.min.css</element>
+    </value>
+    <value key="js">++plone++collective.fancybox/jquery.fancybox.min.js</value>
+  </records>
+  <records interface="Products.CMFPlone.interfaces.resources.IBundleRegistry" prefix="plone.bundles/fancybox">
+    <value key="compile">False</value>
+    <value key="csscompilation">++plone++collective.fancybox/jquery.fancybox.min.css</value>
+    <value key="depends"/>
+    <value key="develop_css">False</value>
+    <value key="develop_javascript">False</value>
+    <value key="enabled">True</value>
+    <value key="expression"/>
+    <value key="jscompilation">++plone++collective.fancybox/jquery.fancybox.min.js</value>
+    <value key="last_compilation"></value>
+    <value key="load_async">False</value>
+    <value key="load_defer">False</value>
+    <value key="merge_with"/>
+    <value key="resources">
+      <element>fancybox</element>
+    </value>
+    <value key="stub_js_modules"/>
+  </records>
 
 </registry>

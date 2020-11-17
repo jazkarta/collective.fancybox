@@ -1,0 +1,37 @@
+Bundle Style and Script Tags Present
+------------------------------------
+
+  >>> from plone.testing.zope import Browser
+  >>> from plone.app.testing import SITE_OWNER_NAME
+  >>> from plone.app.testing import SITE_OWNER_PASSWORD
+  >>> app = layer['app']
+  >>> browser = Browser(app)
+  
+  >>> browser.open('http://nohost/plone')
+  >>> browser.open('http://nohost/plone/login_form')
+  >>> browser.getControl('Login Name').value = SITE_OWNER_NAME
+  >>> browser.getControl('Password').value = SITE_OWNER_PASSWORD
+  >>> browser.getControl('Log in').click()
+
+Create object
+
+  >>> browser.getLink('Page').click()
+  >>> browser.getControl('Title').value = 'Front Page'
+  >>> browser.getControl('Save').click()
+  
+Go to Add-ons control panel
+
+  >>> browser.open('http://nohost/plone/prefs_install_products_form')
+  >>> browser.contents
+  '...<input...name="uninstall_product" value="collective.fancybox...'
+
+Go to Resource Regsitry control panel
+  >>> browser.open('http://nohost/plone/@@resourceregistry-controlpanel')
+  >>> browser.contents
+  '...<input...value="Delete ++plone++collective.fancybox...'
+
+Check object view
+
+  >>> browser.open('http://nohost/plone/front-page')
+  >>> browser.contents
+  '...<script ... data-bundle="fancybox...'

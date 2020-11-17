@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<registry>
+
+  <!-- REMOVE BUNDLES -->
+  <records remove="True" prefix="plone.bundles/fancybox" interface='Products.CMFPlone.interfaces.IBundleRegistry'/>
+
+  <!-- REMOVE RESOURCES -->
+  <records remove="True" prefix="plone.resources/fancybox" interface='Products.CMFPlone.interfaces.IResourceRegistry'/>
+</registry>

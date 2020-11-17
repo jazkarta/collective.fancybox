@@ -4,6 +4,8 @@ from collective.fancybox.testing import \
     COLLECTIVE_FANCYBOX_INTEGRATION_TESTING  # noqa: E501
 from plone import api
 from plone.app.testing import setRoles, TEST_USER_ID
+from plone.registry.interfaces import IRegistry
+from zope.component import getUtility
 
 import unittest
 
@@ -22,10 +24,12 @@ class TestSetup(unittest.TestCase):
     def setUp(self):
         """Custom shared utility setup for tests."""
         self.portal = self.layer['portal']
+        self.request = self.layer['request']
         if get_installer:
-            self.installer = get_installer(self.portal, self.layer['request'])
+            self.installer = get_installer(self.portal, self.request)
         else:
             self.installer = api.portal.get_tool('portal_quickinstaller')
+        self.registry = getUtility(IRegistry)
 
     def test_product_installed(self):
         """Test if collective.fancybox is installed."""
@@ -40,6 +44,32 @@ class TestSetup(unittest.TestCase):
         self.assertIn(
             ICollectiveFancyboxLayer,
             utils.registered_layers())
+
+    def test_resources(self):
+        # Test availability of bundles and resources
+        self.assertEqual(
+            self.registry.records.get(
+                'plone.bundles/fancybox.resources'
+            ).value,
+            ['fancybox'],
+        )
+
+        self.assertEqual(
+            self.registry.records.get(
+                'plone.bundles/fancybox.expression'
+            ).value,
+            None,
+        )
+
+        self.assertEqual(
+            self.registry.records.get('plone.resources/fancybox.css').value,
+            ['++plone++collective.fancybox/jquery.fancybox.min.css',]
+        )
+
+        self.assertEqual(
+            self.registry.records.get('plone.resources/fancybox.js').value,
+            '++plone++collective.fancybox/jquery.fancybox.min.js',
+        )
 
 
 class TestUninstall(unittest.TestCase):
@@ -56,11 +86,26 @@ class TestUninstall(unittest.TestCase):
         setRoles(self.portal, TEST_USER_ID, ['Manager'])
         self.installer.uninstallProducts(['collective.fancybox'])
         setRoles(self.portal, TEST_USER_ID, roles_before)
+        self.registry = getUtility(IRegistry)
 
     def test_product_uninstalled(self):
         """Test if collective.fancybox is cleanly uninstalled."""
         self.assertFalse(self.installer.isProductInstalled(
             'collective.fancybox'))
+
+        # These are removed
+        self.assertEqual(
+            self.registry.records.get('plone.resources/fancybox.js'), None
+        )
+        self.assertEqual(
+            self.registry.records.get('plone.resources/fancybox.css'), None
+        )
+        self.assertEqual(
+            self.registry.records.get('plone.bundles/fancybox'), None
+        )
+        self.assertEqual(
+            self.registry.records.get('plone.bundles/fancybox.resources'), None
+        )
 
     def test_browserlayer_removed(self):
         """Test that ICollectiveFancyboxLayer is removed."""
@@ -70,3 +115,4 @@ class TestUninstall(unittest.TestCase):
         self.assertNotIn(
             ICollectiveFancyboxLayer,
             utils.registered_layers())
+
