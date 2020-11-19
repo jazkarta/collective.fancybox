@@ -21,6 +21,7 @@ var/
 # files
 .installed.cfg
 .mr.developer.cfg
+pyvenv.cfg
 lib64
 log.html
 output.xml
