@@ -1,12 +1,16 @@
 Bundle Style and Script Tags Present
 ------------------------------------
 
+  >>> from collective.fancybox.interfaces import ICollectiveFancyboxMarker
   >>> from plone.testing.zope import Browser
   >>> from plone.app.testing import SITE_OWNER_NAME
   >>> from plone.app.testing import SITE_OWNER_PASSWORD
+  >>> from zope.interface import alsoProvides
+  >>> from zope.interface import noLongerProvides
+  >>> import transaction
   >>> app = layer['app']
   >>> browser = Browser(app)
-  
+
   >>> browser.open('http://nohost/plone')
   >>> browser.open('http://nohost/plone/login_form')
   >>> browser.getControl('Login Name').value = SITE_OWNER_NAME
@@ -18,7 +22,7 @@ Create object
   >>> browser.getLink('Page').click()
   >>> browser.getControl('Title').value = 'Front Page'
   >>> browser.getControl('Save').click()
-  
+
 Go to Add-ons control panel
 
   >>> browser.open('http://nohost/plone/prefs_install_products_form')
@@ -26,12 +30,35 @@ Go to Add-ons control panel
   '...<input...name="uninstall_product" value="collective.fancybox...'
 
 Go to Resource Regsitry control panel
+
   >>> browser.open('http://nohost/plone/@@resourceregistry-controlpanel')
   >>> browser.contents
-  '...<input...value="Delete ++plone++collective.fancybox...'
+  '...&quot;bundles&quot;: {&quot;fancybox&quot;:...'
+
+Enable Lightbox on the object
+
+  >>> alsoProvides(app.plone['front-page'], ICollectiveFancyboxMarker)
+  >>> transaction.commit()
 
 Check object view
 
   >>> browser.open('http://nohost/plone/front-page')
   >>> browser.contents
   '...<script ... data-bundle="fancybox...'
+
+  >>> browser.contents
+  '...$.fancybox.open($(\'.lightbox [data-fancybox]\'));...'
+
+Disable Lightbox on the object
+
+  >>> noLongerProvides(app.plone['front-page'], ICollectiveFancyboxMarker)
+  >>> transaction.commit()
+
+Check that object view has no lightbox
+
+  >>> browser.open('http://nohost/plone/front-page')
+  >>> '...<script ... data-bundle="fancybox...' in browser.contents
+  False
+
+  >>> '...$.fancybox.open($(\'.lightbox [data-fancybox]\'));...' in browser.contents
+  False

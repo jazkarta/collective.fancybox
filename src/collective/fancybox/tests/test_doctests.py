@@ -13,6 +13,7 @@ import six
 
 OPTIONFLAGS = (doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE)
 
+
 class Py23DocChecker(doctest.OutputChecker):
 
     def check_output(self, want, got, optionflags):
@@ -37,7 +38,6 @@ def test_suite():
     standard_filenames = [
         filename for filename in
         glob.glob(os.path.sep.join([os.path.dirname(__file__), '*.txt']))
-#        if os.path.basename(filename) not in ignored
     ]
     suites = [
         layered(
@@ -52,4 +52,3 @@ def test_suite():
     ]
 
     return TestSuite(suites)
-

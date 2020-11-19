@@ -58,12 +58,12 @@ class TestSetup(unittest.TestCase):
             self.registry.records.get(
                 'plone.bundles/fancybox.expression'
             ).value,
-            None,
+            'context/@@hasLightbox',
         )
 
         self.assertEqual(
             self.registry.records.get('plone.resources/fancybox.css').value,
-            ['++plone++collective.fancybox/jquery.fancybox.min.css',]
+            ['++plone++collective.fancybox/jquery.fancybox.min.css', ]
         )
 
         self.assertEqual(
@@ -115,4 +115,3 @@ class TestUninstall(unittest.TestCase):
         self.assertNotIn(
             ICollectiveFancyboxLayer,
             utils.registered_layers())
-

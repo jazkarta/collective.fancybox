@@ -18,10 +18,18 @@
       directory="static"
       />
 
+  <browser:view
+      for="*"
+      name="hasLightbox"
+      permission="zope.Public"
+      class=".viewlets.hasLightbox"
+    />
+
   <browser:viewlet
       name="lightbox"
       for="*"
       view="plone.app.layout.globals.interfaces.IViewView"
+      class=".viewlets.LightboxViewlet"
       manager="plone.app.layout.viewlets.interfaces.IPortalFooter"
       template="templates/lightbox.pt"
       permission="zope2.View"

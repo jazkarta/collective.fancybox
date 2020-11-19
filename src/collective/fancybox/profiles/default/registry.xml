@@ -16,7 +16,7 @@
     <value key="develop_css">False</value>
     <value key="develop_javascript">False</value>
     <value key="enabled">True</value>
-    <value key="expression"/>
+    <value key="expression">context/@@hasLightbox</value>
     <value key="jscompilation">++plone++collective.fancybox/jquery.fancybox.min.js</value>
     <value key="last_compilation"></value>
     <value key="load_async">False</value>
