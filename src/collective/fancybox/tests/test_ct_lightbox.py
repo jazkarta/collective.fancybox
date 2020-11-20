@@ -11,8 +11,6 @@ from zope.component import queryUtility
 import unittest
 
 
-
-
 class LightboxIntegrationTest(unittest.TestCase):
 
     layer = COLLECTIVE_FANCYBOX_INTEGRATION_TESTING

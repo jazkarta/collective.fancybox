@@ -11,3 +11,7 @@ class ICollectiveFancyboxLayer(IDefaultBrowserLayer):
 
 class ICollectiveFancyboxMarker(Interface):
     """Interface that marks an item that has a lightbox."""
+
+
+class ICollectiveFancyboxMarkerGlobal(Interface):
+    """There is a lightbox enabled on the whole site."""

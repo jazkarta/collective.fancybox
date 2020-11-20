@@ -17,11 +17,24 @@ Bundle Style and Script Tags Present
   >>> browser.getControl('Password').value = SITE_OWNER_PASSWORD
   >>> browser.getControl('Log in').click()
 
-Create object
+Create a Document bject
 
   >>> browser.getLink('Page').click()
   >>> browser.getControl('Title').value = 'Front Page'
   >>> browser.getControl('Save').click()
+
+Create a lightbox object
+
+  >>> browser.open('http://nohost/plone')
+  >>> browser.getLink('Lightbox').click()
+  >>> browser.getControl('Title').value = 'Lightbox1'
+  >>> browser.getControl('Save').click()
+  >>> browser.getLink('Publish').click()
+
+Link Lightbox to Page
+
+  >>> setattr(app.plone['front-page'], 'lightbox', app.plone['lightbox1'])
+  >>> transaction.commit()
 
 Go to Add-ons control panel
 

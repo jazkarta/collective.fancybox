@@ -27,6 +27,7 @@ log.html
 output.xml
 pip-selfcheck.json
 report.html
+Session.vim
 .vscode/
 .tox/
 reports/
