@@ -20,27 +20,21 @@ class hasLightbox(object):
     def __call__(self):
         self.target = None
         self.portal = api.portal.get()
-        enabled = self._hasLocalMarker()
-        enabled = enabled or self._hasGlobalMarker()
+        enabled = self._hasLocalMarker() or self._hasGlobalMarker()
 
         if not enabled:
             return False
 
         self.lightbox = self._findLightbox()
-        if not self.lightbox:  # TODO remove this block
-            class LB():
-                id = 'foobar'
-                expires = self.target.expires
-
-            self.lightbox = LB()
-            pass
-            # return True  # TODO will be False once we have tests
-
-        if not self._showFirstTimeOrReturning():
+        if not self.lightbox:
             return False
 
         enabled = self._isPublished() and self._isEffective()
 
+        if not enabled:
+            return False
+
+        enabled = self._showFirstTimeOrReturning()
         return enabled
 
     def _hasLocalMarker(self):
@@ -63,13 +57,24 @@ class hasLightbox(object):
         query = {'lightbox_where': 'everywhere'}
         for result in api.content.find(**query):
             try:
-                obj = result.getObject()
+                if obj is None:
+                    obj = result.getObject()
+                else:
+                    p1 = obj.absolute_url_path()
+                    p2 = result.getObject().absolute_url_path()
+                    raise RuntimeError(
+                        # log.error(
+                        'There should be at most one global marker. '
+                        'Found: {0} and: {1}. (There may or may not '
+                        'be others.)'.format(p1, p2)
+                    )
             except Exception:
                 log.error(
                     'Not possible to fetch object from catalog result for '
                     'item: {0}.'.format(result.getPath()))
-            # there should only be one
-            return obj
+                raise
+        # there should only be one
+        return obj
         log.warning('We have ICollectiveFancyboxMarkerGlobal but no lightbox')
         return None
 
@@ -90,14 +95,14 @@ class hasLightbox(object):
         log.warning('We have ICollectiveFancyboxMarker but no lightbox')
         return None
 
-    def XX_findLightbox(self):
+    def _findLightbox(self):
         """ Find the lightbox object that points to self.target. """
-        if self.context == self.portal:
+        if self.target == self.portal:
             return self._findGlobalLightbox()
         else:
             return self._findLocalLightbox()
 
-    def _findLightbox(self):
+    def XX_findLightbox(self):
         """ TODO remove this. """
         return self.target.lightbox
 
@@ -120,16 +125,21 @@ class hasLightbox(object):
             2. from the viewlet.
         """
         id = 'collective.fancybox.{}'.format(self.lightbox.id)
-        cookie = self.request.cookies.get(id)
-        if cookie:
-            return (self.lightbox.lightbox_repeat == 'always')
-
+        effective = self.lightbox.effective()
+        expires = self.lightbox.expires()
+        timestamp = str(effective.asdatetime().timestamp())
+        if (self.lightbox.lightbox_repeat != 'always'):
+            cookie = self.request.cookies.get(id)
+            if cookie == timestamp:
+                return False
+            else:
+                self.request.response.setCookie(
+                    id,
+                    timestamp,
+                    expires=expires.rfc822()
+                )
+                return True
         else:
-            self.request.response.setCookie(
-                id,
-                "I Was Here",
-                expires=self.lightbox.expires().ISO()
-            )
             return True
 
 

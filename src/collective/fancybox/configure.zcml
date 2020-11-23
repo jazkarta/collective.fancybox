@@ -42,4 +42,32 @@
 
   <!-- -*- extra stuff goes here -*- -->
 
+  <subscriber
+      for=".content.lightbox.ILightbox
+           zope.lifecycleevent.IObjectCreatedEvent"
+      handler=".content.events.lightboxCreated"
+      />
+
+  <subscriber
+      for=".content.lightbox.ILightbox
+           zope.lifecycleevent.IObjectModifiedEvent"
+      handler=".content.events.lightboxModified"
+      />
+
+  <subscriber
+      for=".content.lightbox.ILightbox
+           zope.lifecycleevent.IObjectRemovedEvent"
+      handler=".content.events.lightboxRemoved"
+      />
+
+  <adapter
+      name="lightbox_where"
+      factory=".content.lightbox.lightbox_where"
+      />
+
+  <adapter
+      name="lightbox_repeat"
+      factory=".content.lightbox.lightbox_repeat"
+      />
+
 </configure>

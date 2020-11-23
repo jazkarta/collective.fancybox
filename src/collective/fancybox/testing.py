@@ -12,6 +12,17 @@ from plone.testing import z2
 import collective.fancybox
 
 
+class MockContext(object):
+    lightbox_where = None
+
+
+class MockLightbox(object):
+    id = None
+    lightbox_targets = None
+    lightbox_repeat = None
+    __context__ = MockContext()
+
+
 class CollectiveFancyboxLayer(PloneSandboxLayer):
 
     defaultBases = (PLONE_APP_CONTENTTYPES_FIXTURE,)

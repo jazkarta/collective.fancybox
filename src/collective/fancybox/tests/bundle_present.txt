@@ -1,12 +1,9 @@
 Bundle Style and Script Tags Present
 ------------------------------------
 
-  >>> from collective.fancybox.interfaces import ICollectiveFancyboxMarker
   >>> from plone.testing.zope import Browser
   >>> from plone.app.testing import SITE_OWNER_NAME
   >>> from plone.app.testing import SITE_OWNER_PASSWORD
-  >>> from zope.interface import alsoProvides
-  >>> from zope.interface import noLongerProvides
   >>> import transaction
   >>> app = layer['app']
   >>> browser = Browser(app)
@@ -31,11 +28,6 @@ Create a lightbox object
   >>> browser.getControl('Save').click()
   >>> browser.getLink('Publish').click()
 
-Link Lightbox to Page
-
-  >>> setattr(app.plone['front-page'], 'lightbox', app.plone['lightbox1'])
-  >>> transaction.commit()
-
 Go to Add-ons control panel
 
   >>> browser.open('http://nohost/plone/prefs_install_products_form')
@@ -48,11 +40,6 @@ Go to Resource Regsitry control panel
   >>> browser.contents
   '...&quot;bundles&quot;: {&quot;fancybox&quot;:...'
 
-Enable Lightbox on the object
-
-  >>> alsoProvides(app.plone['front-page'], ICollectiveFancyboxMarker)
-  >>> transaction.commit()
-
 Check object view
 
   >>> browser.open('http://nohost/plone/front-page')
@@ -62,10 +49,10 @@ Check object view
   >>> browser.contents
   '...$.fancybox.open($(\'.lightbox [data-fancybox]\'));...'
 
-Disable Lightbox on the object
+Disable Lightbox
 
-  >>> noLongerProvides(app.plone['front-page'], ICollectiveFancyboxMarker)
-  >>> transaction.commit()
+  >>> browser.open('http://nohost/plone/lightbox1')
+  >>> browser.getLink('Retract').click()
 
 Check that object view has no lightbox
 

@@ -1,4 +1,11 @@
 <?xml version="1.0"?>
-<object name="portal_catalog">
-  <!--<column value="my_meta_column"/>-->
+<object name="portal_catalog" meta_type="Plone Catalog Tool">
+    <index name="lightbox_where" meta_type="FieldIndex">
+        <indexed_attr value="lightbox_where" />
+    </index>
+    <index name="lightbox_repeat" meta_type="FieldIndex">
+        <indexed_attr value="lightbox_repeat" />
+    </index>
+   <column value="lightbox_where" />
+   <column value="lightbox_repeat" />
 </object>
