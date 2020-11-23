@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from collective.fancybox import _
+from collective.fancybox.interfaces import ICollectiveFancyboxMarker
 from collective.fancybox.interfaces import ICollectiveFancyboxMarkerGlobal
 from plone import api
 from plone.app.z3cform.widget import RelatedItemsFieldWidget
@@ -9,16 +11,23 @@ from plone.supermodel import model
 from z3c.form.browser.radio import RadioFieldWidget
 from z3c.relationfield.schema import RelationChoice
 from z3c.relationfield.schema import RelationList
+from z3c.relationfield import RelationValue
 from zope import schema
+from zope.component import getUtility
+from zope.interface import alsoProvides
+from zope.interface import noLongerProvides
 from zope.interface import implementer
 from zope.interface import Invalid
 from zope.interface import invariant
 from zope.interface import providedBy
+from zope.intid.interfaces import IIntIds
 from zope.schema.vocabulary import SimpleTerm
 from zope.schema.vocabulary import SimpleVocabulary
 
+import logging
 
-from collective.fancybox import _
+
+log = logging.getLogger(__name__)
 
 
 class ILightbox(model.Schema):
@@ -100,3 +109,57 @@ def lightbox_where(object, **kw):
 @indexer(ILightbox)
 def lightbox_repeat(object, **kw):
     return object.lightbox_repeat
+
+
+def clearGlobalMarker(context):
+    noLongerProvides(context, ICollectiveFancyboxMarkerGlobal)
+
+
+def clearLocalMarker(context):
+    noLongerProvides(context, ICollectiveFancyboxMarker)
+
+
+def hasGlobalMarker():
+    return ICollectiveFancyboxMarkerGlobal in providedBy(api.portal.get())
+
+
+def hasLocalMarker(context):
+    return ICollectiveFancyboxMarker in providedBy(context)
+
+
+# def setGlobalMarker():
+#     alsoProvides(api.portal.get(), ICollectiveFancyboxMarkerGlobal)
+
+
+def setLocalMarker(context):
+    alsoProvides(context, ICollectiveFancyboxMarker)
+
+
+def getRelationValue(context):
+    intids = getUtility(IIntIds)
+    return RelationValue(intids.getId(context))
+
+
+def getGlobalLightbox():
+    obj = None
+    query = {'lightbox_where': 'everywhere'}
+    for result in api.content.find(**query):
+        try:
+            if not obj:
+                obj = result.getObject()
+            else:
+                log.error(
+                    'There should be at most one global '
+                    'lightbox: {0}.'.format(result.getPath())
+                )
+        except Exception:
+            log.error(
+                'Not possible to fetch object from catalog result for '
+                'item: {0}.'.format(result.getPath())
+            )
+    return obj
+
+
+def canSetGlobalMarker(lightbox):
+    obj = getGlobalLightbox()
+    return (obj is None) or (obj == lightbox)

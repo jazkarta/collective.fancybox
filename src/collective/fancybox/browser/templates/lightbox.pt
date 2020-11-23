@@ -2,7 +2,7 @@
      tal:condition="view/enabled">
 	<div class="col-xs-12">
 		<a href="https://unsplash.it/1200/768.jpg?image=250"
-		    data-fancybox
+		    data-fancybox="${view/lightbox/id}"
 		    data-caption="Caption for single image"
 		    data-options=''>
 			<img src="https://unsplash.it/48/32.jpg?image=250" alt="" />

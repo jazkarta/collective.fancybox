@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from collective.fancybox.content.events import lightboxModified
+from collective.fancybox.content.lightbox import getRelationValue
+from collective.fancybox.interfaces import ICollectiveFancyboxMarker
 from collective.fancybox.interfaces import ICollectiveFancyboxMarkerGlobal
 from collective.fancybox.testing import \
     COLLECTIVE_FANCYBOX_FUNCTIONAL_TESTING  # noqa: E501
@@ -50,15 +52,25 @@ class TestEventHandlers(unittest.TestCase):
 
         self.assertIn(ICollectiveFancyboxMarkerGlobal, providedBy(self.portal))
 
-    def xtest_modified_everywhere_clears_local_markers(self):
+    def test_modified_everywhere_clears_local_markers(self):
         """ on modified clears local markers if lightbox_where is everywhere.
         """
+        setRoles(self.portal, TEST_USER_ID, ['Contributor'])
+        target = api.content.create(
+            container=self.portal,
+            type='Document',
+            id='page1',
+            title='Page1',
+        )
+        rel = getRelationValue(target)
+
         data = MockLightbox()
-        data.lightbox_wehre = 'everywhere'
+        data.lightbox_where = 'everywhere'
+        data.lightbox_targets = [rel, ]
 
         lightboxModified(data, None)
 
-        self.assertEquals(True, True)
+        self.assertNotIn(ICollectiveFancyboxMarker, providedBy(target))
 
     def test_modified_nowhere_clears_targets(self):
         """ on modified leaves targets empty if lightbox_where is nowhere.
@@ -89,15 +101,25 @@ class TestEventHandlers(unittest.TestCase):
 
         self.assertNotIn(ICollectiveFancyboxMarkerGlobal, providedBy(self.portal))
 
-    def xtest_modified_nowhere_clears_local_markers(self):
+    def test_modified_nowhere_clears_local_markers(self):
         """ on modified clears local markers if lightbox_where is nowhere.
         """
+        setRoles(self.portal, TEST_USER_ID, ['Contributor'])
+        target = api.content.create(
+            container=self.portal,
+            type='Document',
+            id='page1',
+            title='Page1',
+        )
+        rel = getRelationValue(target)
+
         data = MockLightbox()
-        data.lightbox_wehre = 'nowhere'
+        data.lightbox_where = 'nowhere'
+        data.lightbox_targets = [rel, ]
 
         lightboxModified(data, None)
 
-        self.assertEquals(True, True)
+        self.assertNotIn(ICollectiveFancyboxMarker, providedBy(target))
 
     def test_modified_select_clears_global_marker(self):
         """ on modified clears global marker if lightbox_where is select.
@@ -117,15 +139,25 @@ class TestEventHandlers(unittest.TestCase):
 
         self.assertNotIn(ICollectiveFancyboxMarkerGlobal, providedBy(self.portal))
 
-    def xtest_modified_select_sets_local_markers(self):
+    def test_modified_select_sets_local_markers(self):
         """ on modified sets local markers if lightbox_where is select.
         """
+        setRoles(self.portal, TEST_USER_ID, ['Contributor'])
+        target = api.content.create(
+            container=self.portal,
+            type='Document',
+            id='page1',
+            title='Page1',
+        )
+        rel = getRelationValue(target)
+
         data = MockLightbox()
         data.lightbox_where = 'select'
+        data.lightbox_targets = [rel, ]
 
         lightboxModified(data, None)
 
-        self.assertEquals(True, True)
+        self.assertIn(ICollectiveFancyboxMarker, providedBy(target))
 
     def test_modified_always_clears_cookie(self):
         """ on modified clears the cookie if lightbox_repeat is always.

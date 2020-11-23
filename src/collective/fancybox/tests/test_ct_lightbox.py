@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from collective.fancybox.interfaces import ICollectiveFancyboxMarker
 from collective.fancybox.interfaces import ICollectiveFancyboxMarkerGlobal
-from collective.fancybox.content.lightbox import ILightbox  # NOQA E501
+from collective.fancybox.content.lightbox import getRelationValue
+from collective.fancybox.content.lightbox import ILightbox
 from collective.fancybox.testing import COLLECTIVE_FANCYBOX_INTEGRATION_TESTING  # noqa
 from plone import api
 from plone.app.testing import setRoles
@@ -144,15 +145,22 @@ class LightboxIntegrationTest(unittest.TestCase):
         )
         self.assertEqual([], obj.lightbox_targets)
 
-    def xtest_ct_lightbox_local_sets_markers(self):
+    def test_ct_lightbox_local_sets_markers(self):
         setRoles(self.portal, TEST_USER_ID, ['Contributor'])
 
+        target = api.content.create(
+            container=self.portal,
+            type='Document',
+            id='page1',
+            title='Page1',
+        )
+        rel = getRelationValue(target)
         api.content.create(
             container=self.portal,
             type='Lightbox',
             id='lightbox',
             lightbox_where='select',
-            lightbox_targets=['foo', ],  # TODO how to set target?
+            lightbox_targets=[rel, ],
         )
 
         query = {'object_provides': ICollectiveFancyboxMarker}

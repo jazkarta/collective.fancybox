@@ -35,7 +35,7 @@ class hasLightbox(object):
             return False
 
         enabled = self._showFirstTimeOrReturning()
-        return enabled
+        return enabled and self.lightbox
 
     def _hasLocalMarker(self):
         """Does context have the marker?"""
@@ -102,10 +102,6 @@ class hasLightbox(object):
         else:
             return self._findLocalLightbox()
 
-    def XX_findLightbox(self):
-        """ TODO remove this. """
-        return self.target.lightbox
-
     def _hasCookie(self):
         pass
 
@@ -147,4 +143,5 @@ class LightboxViewlet(ViewletBase):
 
     def update(self):
         super(LightboxViewlet, self).update()
-        self.enabled = self.context.unrestrictedTraverse('@@hasLightbox')()
+        self.lightbox = self.context.unrestrictedTraverse('@@hasLightbox')()
+        self.enabled = bool(self.lightbox)

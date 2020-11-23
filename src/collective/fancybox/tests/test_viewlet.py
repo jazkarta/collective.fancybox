@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collective.fancybox.content.lightbox import getRelationValue
 from collective.fancybox.interfaces import ICollectiveFancyboxMarker
 from collective.fancybox.testing import \
     COLLECTIVE_FANCYBOX_FUNCTIONAL_TESTING  # noqa: E501
@@ -16,6 +17,7 @@ import unittest
 
 
 VIEWLET = "$.fancybox.open($('.lightbox [data-fancybox]'));"
+VIEWLET_ID = 'data-fancybox="{}"'
 
 
 class TestViewletBase(unittest.TestCase):
@@ -63,16 +65,18 @@ class TestViewletLocalLightbox(TestViewletBase):
     def setUp(self):
         """ One page with local lightbox and one without. """
         super(TestViewletLocalLightbox, self).setUp()
+        rel = getRelationValue(self.portal.page1)
         self.portal.invokeFactory(
             "Lightbox",
             id="lightbox1",
             title="Lightbox 1",
-            lightbox_where='select'
+            lightbox_where='select',
+            lightbox_targets=[rel, ],
         )
         self.wf.doActionFor(self.portal.lightbox1, 'publish')
         transaction.commit()
 
-    def xtest_is_present_with_marker(self):
+    def test_is_present_with_marker(self):
         """ Test if the viewlet is present when the object has marker interface. """
         page1 = self.portal.page1
         browser = self.get_browser()
@@ -93,12 +97,14 @@ class TestViewletGlobalLightbox(TestViewletBase):
     def setUp(self):
         """ One page with global lightbox and one with local lightbox. """
         super(TestViewletGlobalLightbox, self).setUp()
+        rel = getRelationValue(self.portal.page2)
         self.portal.invokeFactory("Lightbox", id="lightbox1", title="Lightbox 1")
         self.portal.invokeFactory(
             "Lightbox",
             id="lightbox2",
             title="Lightbox 2",
-            lightbox_where='select'
+            lightbox_where='select',
+            lightbox_targets=[rel, ],
         )
         self.wf.doActionFor(self.portal.lightbox1, 'publish')
         self.wf.doActionFor(self.portal.lightbox2, 'publish')
@@ -111,13 +117,13 @@ class TestViewletGlobalLightbox(TestViewletBase):
         browser.open(page1.absolute_url())
         self.assertIn(VIEWLET, browser.contents)
 
-    def xtest_is_present_with_local_marker(self):
+    def test_is_present_with_local_marker(self):
         """ A page with the local marker should have the local lightbox. """
         page2 = self.portal.page2
         browser = self.get_browser()
         browser.open(page2.absolute_url())
         # TODO distinguish between local and global viewlet
-        self.assertIn(VIEWLET, browser.contents)
+        self.assertIn(VIEWLET_ID.format(self.portal.lightbox2.id), browser.contents)
 
 
 class TestViewletCookie(TestViewletBase):
