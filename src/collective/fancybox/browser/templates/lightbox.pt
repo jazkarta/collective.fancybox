@@ -1,17 +1,33 @@
 <div class="row lightbox" style="display:none;"
-     tal:condition="view/enabled">
-	<div class="col-xs-12">
-		<a href="https://unsplash.it/1200/768.jpg?image=250"
-		    data-fancybox="${view/lightbox/id}"
-		    data-caption="Caption for single image"
-		    data-options=''>
-			<img src="https://unsplash.it/48/32.jpg?image=250" alt="" />
-		</a>
+    tal:condition="view/enabled">
+    <div class="col-xs-12"
+         tal:define="scale_func view/lightbox/@@images;
+             scaled_image python: getattr(view.lightbox.aq_explicit, 'image', False) and scale_func.scale('image')">
+        <a href="${scaled_image/url|nothing}"
+            data-fancybox="${view/lightbox/id}"
+            data-caption="${view/lightbox/image_caption}"
+            data-goto="${view/lightbox/lightbox_url}"
+            data-options=''>
+            <img src="" alt="" />
+        </a>
 
-	</div>
-        <script>
-        $( document ).ready(function() {
-        	$.fancybox.open($('.lightbox [data-fancybox]'));
-        })
-        </script>	
+    </div>
+    <script>
+    $( document ).ready(function() {
+        $.fancybox.open($('.lightbox [data-fancybox]'), {
+            buttons: [
+            'close'
+            ],
+            caption : function( instance, item ) {
+                var caption = $(this).data('caption') || '';
+                var url = $(this).data('goto') || '';
+
+                if ( url.length ) {
+                  caption = '<a href="' + url + '">' + caption + '</a>' ;
+                }
+                return caption;
+              }
+        });
+    })
+    </script>   
 </div>

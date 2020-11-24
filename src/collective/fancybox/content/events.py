@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from collective.fancybox import _
 from collective.fancybox.content.lightbox import canSetGlobalMarker
+from collective.fancybox.content.lightbox import canSetLocalMarker
 from collective.fancybox.content.lightbox import clearLocalMarker
-from collective.fancybox.content.lightbox import hasLocalMarker
+from collective.fancybox.content.lightbox import getLocalLightboxesFor
 from collective.fancybox.content.lightbox import setLocalMarker
 from collective.fancybox.interfaces import ICollectiveFancyboxMarkerGlobal
 from plone import api
@@ -24,7 +25,7 @@ def lightboxCreated(object, event):
     if object.lightbox_where == u'nowhere':
         clearTargets(object)
     if object.lightbox_where == u'select':
-        setLocalMarkers(object.lightbox_targets)
+        setLocalMarkers(object, object.lightbox_targets)
 
 
 def lightboxModified(object, event):
@@ -40,7 +41,7 @@ def lightboxModified(object, event):
         clearCookie(object)
     if object.lightbox_where == u'select':
         clearGlobalMarker(object)
-        setLocalMarkers(targets)
+        setLocalMarkers(object, targets)
     if object.lightbox_repeat == u'always':
         clearCookie(object)
 
@@ -84,16 +85,17 @@ def setGlobalMarker(context):
         raise Invalid(_('Another lightbox already shows everywhere'))
 
 
-def setLocalMarkers(targets):
+def setLocalMarkers(lightbox, targets):
     for target in targets:
         if not target.isBroken():
             obj = target.to_object
-            if hasLocalMarker(obj):
-                msg = 'Another lightbox already points to {0}'
-                slot = obj.absolute_url_path()
-                raise Invalid(msg.format(slot))
-            else:
+            if canSetLocalMarker(lightbox, obj):
                 setLocalMarker(obj)
+            else:
+                msg = 'Another lightbox already points to {0}: {1}'
+                slot = obj.absolute_url_path()
+                slot1 = getLocalLightboxesFor(obj)[0].absolute_url_path()
+                raise Invalid(msg.format(slot, slot1))
 
 
 def clearCookie(context):

@@ -193,3 +193,17 @@ class LightboxIntegrationTest(unittest.TestCase):
         query = {'object_provides': ICollectiveFancyboxMarker}
         result = api.content.find(**query)
         self.assertEqual(0, len(result))
+
+    def test_ct_lightbox_leadimage_caption(self):
+        setRoles(self.portal, TEST_USER_ID, ['Contributor'])
+
+        obj = api.content.create(
+            container=self.portal,
+            type='Lightbox',
+            id='lightbox',
+            lightbox_where='select',
+            image_caption='hello world',
+        )
+
+        self.assertTrue(hasattr(obj, 'image_caption'))
+        self.assertEqual(getattr(obj, 'image_caption'), 'hello world')

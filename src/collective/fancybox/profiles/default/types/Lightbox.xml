@@ -40,7 +40,7 @@
     <!-- <element value="plone.categorization"/> -->
     <element value="plone.basic"/>
     <element value="plone.locking" />
-    <element value="plone.app.referenceablebehavior.referenceable.IReferenceable" />
+    <!-- <element value="plone.app.referenceablebehavior.referenceable.IReferenceable" /> -->
     <element value="plone.leadimage"/>
     <!--<element value="plone.relateditems"/>-->
     <!--<element value="plone.richtext"/>-->

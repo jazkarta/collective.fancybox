@@ -17,7 +17,7 @@ import transaction
 import unittest
 
 
-VIEWLET = "$.fancybox.open($('.lightbox [data-fancybox]'));"
+VIEWLET = "$.fancybox.open($('.lightbox [data-fancybox]')"
 VIEWLET_ID = 'data-fancybox="{}"'
 
 

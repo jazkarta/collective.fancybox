@@ -25,20 +25,9 @@ Create a lightbox object
   >>> browser.open('http://nohost/plone')
   >>> browser.getLink('Lightbox').click()
   >>> browser.getControl('Title').value = 'Lightbox1'
+  >>> browser.getControl('Lead Image Caption').value = 'Hello world'
   >>> browser.getControl('Save').click()
   >>> browser.getLink('Publish').click()
-
-Go to Add-ons control panel
-
-  >>> browser.open('http://nohost/plone/prefs_install_products_form')
-  >>> browser.contents
-  '...<input...name="uninstall_product" value="collective.fancybox...'
-
-Go to Resource Regsitry control panel
-
-  >>> browser.open('http://nohost/plone/@@resourceregistry-controlpanel')
-  >>> browser.contents
-  '...&quot;bundles&quot;: {&quot;fancybox&quot;:...'
 
 Check object view
 
@@ -49,16 +38,17 @@ Check object view
   >>> browser.contents
   '...$.fancybox.open($(\'.lightbox [data-fancybox]\')...'
 
-Disable Lightbox
+  >>> browser.contents
+  '...data-caption="Hello world"...'
+
+Check object view
 
   >>> browser.open('http://nohost/plone/lightbox1')
-  >>> browser.getLink('Retract').click()
+  >>> browser.getLink('Edit').click()
+  >>> browser.getControl('Lead Image Caption').value = 'Hello world'
+  >>> browser.getControl('Save').click()
+  >>> browser.contents
+  '...<script ... data-bundle="fancybox...'
 
-Check that object view has no lightbox
-
-  >>> browser.open('http://nohost/plone/front-page')
-  >>> '...<script ... data-bundle="fancybox...' in browser.contents
-  False
-
-  >>> '...$.fancybox.open($(\'.lightbox [data-fancybox]\')...' in browser.contents
-  False
+  >>> '...data-caption...' in browser.contents
+  False 

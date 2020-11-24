@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
+from collective.fancybox.content.lightbox import getLocalLightboxesFor
 from collective.fancybox.content.lightbox import hasGlobalMarker
 from collective.fancybox.interfaces import ICollectiveFancyboxMarker
 from plone import api
 from plone.app.layout.viewlets.common import ViewletBase
-from z3c.relationfield.index import dump
-from zc.relation.interfaces import ICatalog
-from zope.component import getUtility
 from zope.interface import providedBy
 
 import logging
 
 
 log = logging.getLogger(__name__)
+
+
+class LightboxViewlet(ViewletBase):
+
+    def update(self):
+        super(LightboxViewlet, self).update()
+        self.lightbox = self.context.unrestrictedTraverse('@@hasLightbox')()
+        self.enabled = bool(self.lightbox)
 
 
 class hasLightbox(object):
@@ -82,20 +88,12 @@ class hasLightbox(object):
 
     def _findLocalLightbox(self):
         """ Look for relations of type Lightbox that point here."""
-        cat = getUtility(ICatalog)
-        int_id = dump(self.context, cat, {})
-
-        if int_id:
-            rels = cat.findRelations(dict(to_id=int_id))
-            relations = [r for r in rels]
-            for relation in (relations or []):
-                if not relation.isBroken():
-                    obj = relation.from_object
-                    if hasattr(obj, 'portal_type'):
-                        if obj and obj.portal_type == 'Lightbox':
-                            return obj
-        log.warning('We have ICollectiveFancyboxMarker but no lightbox')
-        return None
+        lightboxes = getLocalLightboxesFor(self.context)
+        if lightboxes and len(lightboxes) > 0:
+            return lightboxes[0]
+        else:
+            log.warning('We have ICollectiveFancyboxMarker but no lightbox')
+            return None
 
     def _findLightbox(self):
         """ Find the lightbox object that points to self.target. """
@@ -136,11 +134,3 @@ class hasLightbox(object):
                 return True
         else:
             return True
-
-
-class LightboxViewlet(ViewletBase):
-
-    def update(self):
-        super(LightboxViewlet, self).update()
-        self.lightbox = self.context.unrestrictedTraverse('@@hasLightbox')()
-        self.enabled = bool(self.lightbox)

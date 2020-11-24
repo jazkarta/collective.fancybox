@@ -9,9 +9,11 @@ from plone.dexterity.content import Item
 from plone.indexer.decorator import indexer
 from plone.supermodel import model
 from z3c.form.browser.radio import RadioFieldWidget
+from z3c.relationfield.index import dump
 from z3c.relationfield.schema import RelationChoice
 from z3c.relationfield.schema import RelationList
 from z3c.relationfield import RelationValue
+from zc.relation.interfaces import ICatalog
 from zope import schema
 from zope.component import getUtility
 from zope.interface import alsoProvides
@@ -131,6 +133,23 @@ def getRelationValue(context):
     return RelationValue(intids.getId(context))
 
 
+def getLocalLightboxesFor(context):
+    lightboxes = []
+    cat = getUtility(ICatalog)
+    int_id = dump(context, cat, {})
+
+    if int_id:
+        rels = cat.findRelations(dict(to_id=int_id))
+        relations = [r for r in rels]
+        for relation in (relations or []):
+            if not relation.isBroken():
+                obj = relation.from_object
+                if hasattr(obj, 'portal_type'):
+                    if obj and obj.portal_type == 'Lightbox':
+                        lightboxes.append(obj)
+    return lightboxes
+
+
 def getGlobalLightbox():
     obj = None
     query = {'lightbox_where': 'everywhere'}
@@ -148,3 +167,14 @@ def getGlobalLightbox():
 def canSetGlobalMarker(lightbox):
     obj = getGlobalLightbox()
     return (obj is None) or (obj == lightbox)
+
+
+def canSetLocalMarker(lightbox, target):
+    lightboxes = getLocalLightboxesFor(target)
+    if len(lightboxes) == 0:
+        return True
+    elif len(lightboxes) == 1:
+        lb = lightboxes[0]
+        return (lb is None) or (lb == lightbox)
+    else:
+        return False

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from collective.fancybox.content.events import lightboxModified
 from collective.fancybox.content.lightbox import getRelationValue
+from collective.fancybox.content.lightbox import hasLocalMarker
 from collective.fancybox.interfaces import ICollectiveFancyboxMarker
 from collective.fancybox.interfaces import ICollectiveFancyboxMarkerGlobal
 from collective.fancybox.testing import \
@@ -11,7 +12,6 @@ from plone.app.testing import TEST_USER_ID
 from plone import api
 from plone.registry.interfaces import IRegistry
 from zope.component import getUtility
-from zope.interface import alsoProvides
 from zope.interface import Invalid
 from zope.interface import providedBy
 
@@ -186,10 +186,12 @@ class TestEventHandlers(unittest.TestCase):
         data.lightbox_targets = [rel, ]
 
         lightboxModified(data, None)
-
         self.assertIn(ICollectiveFancyboxMarker, providedBy(target))
 
-    def test_modified_select_error(self):
+        lightboxModified(data, None)
+        self.assertIn(ICollectiveFancyboxMarker, providedBy(target))
+
+    def test_modified_select_same(self):
         """ on modified raises error if local marker already exists
         """
         setRoles(self.portal, TEST_USER_ID, ['Contributor'])
@@ -201,14 +203,38 @@ class TestEventHandlers(unittest.TestCase):
         )
         rel = getRelationValue(target)
 
-        alsoProvides(target, ICollectiveFancyboxMarker)
+        # alsoProvides(target, ICollectiveFancyboxMarker)
 
         data = MockLightbox()
         data.lightbox_where = 'select'
         data.lightbox_targets = [rel, ]
+        lightboxModified(data, None)
+        self.assertTrue(hasLocalMarker(target))
 
+    def test_created_select_multiple_local_error(self):
+        setRoles(self.portal, TEST_USER_ID, ['Contributor'])
+        target = api.content.create(
+            container=self.portal,
+            type='Document',
+            id='page1',
+            title='Page1',
+        )
+        rel = getRelationValue(target)
+        api.content.create(
+            container=self.portal,
+            type='Lightbox',
+            id='lightbox',
+            lightbox_where='select',
+            lightbox_targets=[rel, ],
+        )
         try:
-            lightboxModified(data, None)
+            api.content.create(
+                container=self.portal,
+                type='Lightbox',
+                id='lightbox2',
+                lightbox_where='select',
+                lightbox_targets=[rel, ],
+            )
             self.fail()
         except Invalid:
             pass
