@@ -84,8 +84,7 @@ class ILightbox(model.Schema):
             old_where = getattr(data.__context__, 'lightbox_where', None)
             if old_where != data.lightbox_where:
                 msg = 'Another lightbox already shows everywhere {0}'
-                marker = ICollectiveFancyboxMarkerGlobal in providedBy(api.portal.get())
-                if marker:
+                if hasGlobalMarker():
                     query = {'lightbox_where': 'everywhere'}
                     results = api.content.find(**query)
                     if len(results) > 0:
@@ -111,10 +110,6 @@ def lightbox_repeat(object, **kw):
     return object.lightbox_repeat
 
 
-def clearGlobalMarker(context):
-    noLongerProvides(context, ICollectiveFancyboxMarkerGlobal)
-
-
 def clearLocalMarker(context):
     noLongerProvides(context, ICollectiveFancyboxMarker)
 
@@ -125,10 +120,6 @@ def hasGlobalMarker():
 
 def hasLocalMarker(context):
     return ICollectiveFancyboxMarker in providedBy(context)
-
-
-# def setGlobalMarker():
-#     alsoProvides(api.portal.get(), ICollectiveFancyboxMarkerGlobal)
 
 
 def setLocalMarker(context):
@@ -144,18 +135,12 @@ def getGlobalLightbox():
     obj = None
     query = {'lightbox_where': 'everywhere'}
     for result in api.content.find(**query):
-        try:
-            if not obj:
-                obj = result.getObject()
-            else:
-                log.error(
-                    'There should be at most one global '
-                    'lightbox: {0}.'.format(result.getPath())
-                )
-        except Exception:
-            log.error(
-                'Not possible to fetch object from catalog result for '
-                'item: {0}.'.format(result.getPath())
+        if not obj:
+            obj = result.getObject()
+        else:
+            raise Invalid(
+                'There should be at most one global '
+                'lightbox: {0}.'.format(result.getPath())
             )
     return obj
 

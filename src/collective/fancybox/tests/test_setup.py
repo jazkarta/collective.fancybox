@@ -77,6 +77,7 @@ class TestUninstall(unittest.TestCase):
     layer = COLLECTIVE_FANCYBOX_INTEGRATION_TESTING
 
     def setUp(self):
+        from collective.fancybox.content.lightbox import getRelationValue
         self.portal = self.layer['portal']
         if get_installer:
             self.installer = get_installer(self.portal, self.layer['request'])
@@ -84,13 +85,22 @@ class TestUninstall(unittest.TestCase):
             self.installer = api.portal.get_tool('portal_quickinstaller')
         roles_before = api.user.get_roles(TEST_USER_ID)
         setRoles(self.portal, TEST_USER_ID, ['Manager'])
+        target = api.content.create(
+            container=self.portal,
+            type='Document',
+            id='page1',
+            title='Page1',
+        )
+        rel = getRelationValue(target)
         self.portal.invokeFactory("Lightbox", id="lightbox1", title="Lightbox 1")
         self.portal.invokeFactory(
             "Lightbox",
             id="lightbox2",
             title="Lightbox 2",
-            lightbox_where='select'
+            lightbox_where='select',
+            lightbox_targets=[rel, ],
         )
+        target.reindexObject()
         self.installer.uninstallProducts(['collective.fancybox'])
         setRoles(self.portal, TEST_USER_ID, roles_before)
         self.registry = getUtility(IRegistry)
@@ -116,8 +126,7 @@ class TestUninstall(unittest.TestCase):
 
     def test_browserlayer_removed(self):
         """ Test that ICollectiveFancyboxLayer is removed. """
-        from collective.fancybox.interfaces import \
-            ICollectiveFancyboxLayer
+        from collective.fancybox.interfaces import ICollectiveFancyboxLayer
         from plone.browserlayer import utils
         self.assertNotIn(
             ICollectiveFancyboxLayer,
@@ -125,8 +134,7 @@ class TestUninstall(unittest.TestCase):
 
     def test_global_marker_removed(self):
         """ Test that there is no global marker left around. """
-        from collective.fancybox.interfaces import \
-            ICollectiveFancyboxMarkerGlobal
+        from collective.fancybox.interfaces import ICollectiveFancyboxMarkerGlobal
         from zope.interface import providedBy
         self.assertNotIn(
             ICollectiveFancyboxMarkerGlobal,
@@ -135,8 +143,7 @@ class TestUninstall(unittest.TestCase):
 
     def test_local_marker_removed(self):
         """ Test that there is no local marker left around. """
-        from collective.fancybox.interfaces import \
-            ICollectiveFancyboxMarker
+        from collective.fancybox.interfaces import ICollectiveFancyboxMarker
         from zope.interface import providedBy
         query = {'object_provides': ICollectiveFancyboxMarker}
         for result in api.content.find(**query):

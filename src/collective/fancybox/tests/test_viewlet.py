@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from collective.fancybox.content.lightbox import getRelationValue
+from collective.fancybox.content.events import setGlobalMarker
 from collective.fancybox.interfaces import ICollectiveFancyboxMarker
 from collective.fancybox.testing import \
     COLLECTIVE_FANCYBOX_FUNCTIONAL_TESTING  # noqa: E501
@@ -89,6 +90,42 @@ class TestViewletLocalLightbox(TestViewletBase):
         browser = self.get_browser()
         browser.open(page2.absolute_url())
         self.assertNotIn(VIEWLET, browser.contents)
+
+
+class TestViewletErrorGlobal(TestViewletBase):
+    """ Simulate error condition: global marker but no lightbox. """
+
+    def setUp(self):
+        """ One page with global lightbox and one with local lightbox. """
+        super(TestViewletErrorGlobal, self).setUp()
+
+    def test_error_marker_without_lightbox(self):
+        setGlobalMarker(None)
+        transaction.commit()
+        browser = self.get_browser()
+        try:
+            browser.open(self.portal.page1.absolute_url())
+            self.fail()
+        except RuntimeError:
+            pass
+
+    def test_error_marker_with_two_global_lightboxes(self):
+        self.portal.invokeFactory("Lightbox", id="lightbox1", title="Lightbox 1")
+        self.portal.invokeFactory(
+            "Lightbox",
+            id="lightbox2",
+            title="Lightbox 2",
+            lightbox_where='nowhere',
+        )
+        self.portal.lightbox2.lightbox_where = 'everywhere'
+        self.portal.lightbox2.reindexObject()
+        transaction.commit()
+        browser = self.get_browser()
+        try:
+            browser.open(self.portal.page1.absolute_url())
+            self.fail()
+        except RuntimeError:
+            pass
 
 
 class TestViewletGlobalLightbox(TestViewletBase):

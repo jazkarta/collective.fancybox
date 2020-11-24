@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
+from collective.fancybox.content.lightbox import hasGlobalMarker
 from collective.fancybox.interfaces import ICollectiveFancyboxMarker
-from collective.fancybox.interfaces import ICollectiveFancyboxMarkerGlobal
 from plone import api
 from plone.app.layout.viewlets.common import ViewletBase
 from z3c.relationfield.index import dump
@@ -45,7 +45,7 @@ class hasLightbox(object):
 
     def _hasGlobalMarker(self):
         """Does portal have the global marker?"""
-        if ICollectiveFancyboxMarkerGlobal in providedBy(self.portal):
+        if hasGlobalMarker():
             self.target = self.portal
         return bool(self.target)
 
@@ -64,7 +64,7 @@ class hasLightbox(object):
                     p2 = result.getObject().absolute_url_path()
                     raise RuntimeError(
                         # log.error(
-                        'There should be at most one global marker. '
+                        'There should be at most one global lightbox. '
                         'Found: {0} and: {1}. (There may or may not '
                         'be others.)'.format(p1, p2)
                     )
@@ -74,9 +74,11 @@ class hasLightbox(object):
                     'item: {0}.'.format(result.getPath()))
                 raise
         # there should only be one
+        if not obj:
+            raise RuntimeError(
+                'We have ICollectiveFancyboxMarkerGlobal but no lightbox'
+            )
         return obj
-        log.warning('We have ICollectiveFancyboxMarkerGlobal but no lightbox')
-        return None
 
     def _findLocalLightbox(self):
         """ Look for relations of type Lightbox that point here."""
@@ -101,9 +103,6 @@ class hasLightbox(object):
             return self._findGlobalLightbox()
         else:
             return self._findLocalLightbox()
-
-    def _hasCookie(self):
-        pass
 
     def _isPublished(self):
         return api.content.get_state(self.lightbox) == 'published'

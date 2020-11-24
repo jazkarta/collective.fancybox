@@ -28,28 +28,30 @@ def lightboxCreated(object, event):
 
 
 def lightboxModified(object, event):
+    targets = object.lightbox_targets
     if object.lightbox_where == u'everywhere':
         clearTargets(object)
         setGlobalMarker(object)
-        clearLocalMarkers(object.lightbox_targets)
+        clearLocalMarkers(targets)
     if object.lightbox_where == u'nowhere':
         clearTargets(object)
         clearGlobalMarker(object)
-        clearLocalMarkers(object.lightbox_targets)
+        clearLocalMarkers(targets)
         clearCookie(object)
     if object.lightbox_where == u'select':
         clearGlobalMarker(object)
-        setLocalMarkers(object.lightbox_targets)
+        setLocalMarkers(targets)
     if object.lightbox_repeat == u'always':
         clearCookie(object)
 
 
 def lightboxRemoved(object, event):
+    targets = object.lightbox_targets
     clearCookie(object)
     if object.lightbox_where == u'everywhere':
         clearGlobalMarker(object)
     if object.lightbox_where == u'select':
-        clearLocalMarkers(object.lightbox_targets)
+        clearLocalMarkers(targets)
 
 
 def clearTargets(data):
@@ -70,8 +72,8 @@ def clearGlobalMarker(context):
 
 
 def clearLocalMarkers(targets):
-    for target in targets:
-        if not target.isBroken():
+    for target in targets or []:
+        if hasattr(target, 'isBroken') and not target.isBroken():
             clearLocalMarker(target.to_object)
 
 
