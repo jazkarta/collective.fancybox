@@ -23,7 +23,7 @@
                 var url = $(this).data('goto') || '';
 
                 if ( url.length ) {
-                  caption = '<a href="' + url + '">' + caption + '</a>' ;
+			caption = '<div class="captionwrapper"><a class="captionbutton" href="' + url + '">' + caption + '</a></div>' ;
                 }
                 return caption;
               }

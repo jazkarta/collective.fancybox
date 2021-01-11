@@ -73,7 +73,7 @@ class ILightbox(model.Schema):
 
     lightbox_url = schema.URI(
         title=u"URL",
-        description=u"Open this URL when the lightbox is clicked",
+        description=u"Open this URL when the lightbox caption is clicked",
         required=False,
     )
 
