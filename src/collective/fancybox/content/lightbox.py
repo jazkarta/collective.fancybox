@@ -71,9 +71,16 @@ class ILightbox(model.Schema):
         vocabulary='plone.app.vocabularies.Catalog',
     )
 
+    lightbox_button_label = schema.TextLine(
+        title=_(u'Button Label'),
+        description=u'Label for the button displayed under the caption',
+        default=u'',
+        required=False,
+    )
+
     lightbox_url = schema.URI(
         title=u"URL",
-        description=u"Open this URL when the lightbox caption is clicked",
+        description=u"Open this URL when the caption button is clicked",
         required=False,
     )
 

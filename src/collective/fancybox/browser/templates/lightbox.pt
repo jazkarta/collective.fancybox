@@ -6,6 +6,7 @@
         <a href="${scaled_image/url|nothing}"
             data-fancybox="${view/lightbox/id}"
             data-caption="${view/lightbox/image_caption}"
+	    data-captionbutton="${view/lightbox/lightbox_button_label}"
             data-goto="${view/lightbox/lightbox_url}"
             data-options=''>
             <img src="" alt="" />
@@ -18,15 +19,34 @@
             buttons: [
             'close'
             ],
-            caption : function( instance, item ) {
+            caption: function( instance, current ) {
                 var caption = $(this).data('caption') || '';
+		var captionbutton = $(this).data('captionbutton') || '';
                 var url = $(this).data('goto') || '';
 
-                if ( url.length ) {
-			caption = '<div class="captionwrapper"><a class="captionbutton" href="' + url + '">' + caption + '</a></div>' ;
-                }
+	        caption = '<div class="captionwrapper"><div>' + caption + '</div>';
+		if ( captionbutton.length ) {
+			caption = caption + 
+				  '<a class="captionbutton" href="' + url + '">' 
+				  + captionbutton + '</a>' ;
+		}
+		caption = caption + '</div>';
                 return caption;
-              }
+            },
+            afterShow: function( instance, current ) {
+                fbContent = document.querySelector('.fancybox-content');
+		fbCaption = document.querySelector('.fancybox-caption');
+		fbToolbar = document.querySelector('.fancybox-toolbar');
+
+		fbContent.appendChild(fbCaption);
+		fbContent.appendChild(fbToolbar);
+		fbCaption.classList.add('fancybox-caption__moved');
+                fbCaption.style.marginBottom = "-" + fbCaption.offsetHeight + "px";
+		$('.fancybox-content').off('click');
+		$('.fancybox-content').click(function(e) {
+			window.location.href = document.querySelector('.captionbutton').href;
+		});
+            },
         });
     })
     </script>   

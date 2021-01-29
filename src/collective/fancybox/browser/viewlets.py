@@ -40,8 +40,15 @@ class hasLightbox(object):
         if not enabled:
             return False
 
+        if self._contextIsDestination():
+            return False
+
         enabled = self._showFirstTimeOrReturning()
         return enabled and self.lightbox
+
+    def _contextIsDestination(self):
+        destination = self.lightbox.lightbox_url
+        return destination == self.context.absolute_url()
 
     def _hasLocalMarker(self):
         """Does context have the marker?"""
@@ -81,8 +88,9 @@ class hasLightbox(object):
                 raise
         # there should only be one
         if not obj:
-            raise RuntimeError(
-                'We have ICollectiveFancyboxMarkerGlobal but no lightbox'
+            log.warning(
+                'We have ICollectiveFancyboxMarkerGlobal but no lightbox. '
+                '(It might be private.)'
             )
         return obj
 
