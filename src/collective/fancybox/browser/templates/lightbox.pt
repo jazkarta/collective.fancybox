@@ -43,6 +43,9 @@
                 fbCaption.classList.add('fancybox-caption__moved');
                         fbCaption.style.marginBottom = "-" + fbCaption.offsetHeight + "px";
                 $('.fancybox-content').off('click');
+                $('.fancybox-image').click(function(e) {
+                    window.location.href = document.querySelector('.captionbutton').href;
+                });
             },
         });
     })
