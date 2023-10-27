@@ -1,53 +1,100 @@
-<div class="row lightbox" style="display:none;"
-    tal:condition="view/enabled">
-    <div class="col-xs-12"
-         tal:define="scale_func view/lightbox/@@images;
-             scaled_image python: getattr(view.lightbox.aq_explicit, 'image', False) and scale_func.scale('image')">
-        <a href="${scaled_image/url|nothing}"
-            data-fancybox="${view/lightbox/id}"
-            data-caption="${view/lightbox/image_caption}"
-	    data-captionbutton="${view/lightbox/lightbox_button_label}"
-            data-goto="${view/lightbox/lightbox_url}"
-            data-options=''>
-            <img src="" alt="" />
-        </a>
+<div class="row lightbox" style="display:none;" tal:condition="view/enabled">
+  <div class="col-xs-12" tal:define="scale_func view/lightbox/@@images; scaled_image python: getattr(view.lightbox.aq_explicit, 'image', False) and scale_func.scale('image')">
+    <a href="${scaled_image/url|nothing}"
+      tal:attributes="
+        data-effective python: view.lightbox.effective().asdatetime().timestamp();
+        data-expires python: view.lightbox.expires().rfc822();
+      "
+      data-lightbox-id="${view/lightbox/id}"
+      data-caption="${view/lightbox/image_caption}"
+      data-captionbutton="${view/lightbox/lightbox_button_label}"
+      data-lightbox-repeat="${view/lightbox/lightbox_repeat}"
+      data-goto="${view/lightbox/lightbox_url}"
+      data-options=''>
+      <img src="" alt="" />
+    </a>
+  </div>
+  <script>
+    $(document).ready(function() {
 
-    </div>
-    <script>
-    $( document ).ready(function() {
-        $.fancybox.open($('.lightbox [data-fancybox]'), {
-            buttons: [
-            'close'
-            ],
-            caption: function( instance, current ) {
-                var caption = $(this).data('caption') || '';
-		var captionbutton = $(this).data('captionbutton') || '';
-                var url = $(this).data('goto') || '';
+      function setCookie(cname, cvalue, exdays) {
+        const d = new Date();
+        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+        let expires = "expires="+d.toUTCString();
+        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+      }
 
-	        caption = '<div class="captionwrapper"><div>' + caption + '</div>';
-		if ( captionbutton.length ) {
-			caption = caption +
-				  '<a class="captionbutton" href="' + url + '">'
-				  + captionbutton + '</a>' ;
-		}
-		caption = caption + '</div>';
-                return caption;
-            },
-            afterShow: function( instance, current ) {
-                fbContent = document.querySelector('.fancybox-content');
-                fbCaption = document.querySelector('.fancybox-caption');
-                fbToolbar = document.querySelector('.fancybox-toolbar');
+      function getCookie(cname) {
+        let name = cname + "=";
+        let ca = document.cookie.split(';');
+        for(let i = 0; i < ca.length; i++) {
+          let c = ca[i];
+          while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+          }
+          if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+          }
+        }
+        return "";
+      }
 
-                fbContent.appendChild(fbCaption);
-                fbContent.appendChild(fbToolbar);
-                fbCaption.classList.add('fancybox-caption__moved');
-                        fbCaption.style.marginBottom = "-" + fbCaption.offsetHeight + "px";
-                $('.fancybox-content').off('click');
-                $('.fancybox-image').click(function(e) {
-                    window.location.href = document.querySelector('.captionbutton').href;
-                });
-            },
+      function shouldDisplay(lightbox) {
+        let lightboxRepeat = lightbox.data().lightboxRepeat;
+
+        if (lightboxRepeat != 'always') {
+          let cookieId = 'collective.fancybox' + lightbox.data().lightboxId
+          let effective = lightbox.data().effective;
+          let expires = lightbox.data().expires;
+          let cookie = getCookie(cookieId);
+          if (cookie == effective) {
+            return false;
+          } else {
+            setCookie(
+              cookieId,
+              effective,
+              expires
+            );
+            return true;
+          }
+        }
+        return true;
+      }
+
+      let lightbox = $('.lightbox [data-lightbox-id]');
+      if (shouldDisplay(lightbox)) {
+        $.fancybox.open(lightbox, {
+          buttons: ['close'],
+          caption: function(instance, current) {
+            var caption = $(this).data('caption') || '';
+            var captionbutton = $(this).data('captionbutton') || '';
+            var url = $(this).data('goto') || '';
+            caption = '<div class="captionwrapper"><div>' + caption + '</div>';
+            if ( captionbutton.length ) {
+              caption = caption +
+                '<a class="captionbutton" href="' + url + '">' +
+                captionbutton +
+                '</a>';
+            }
+            caption = caption + '</div>';
+            return caption;
+          },
+          afterShow: function(instance, current) {
+            fbContent = document.querySelector('.fancybox-content');
+            fbCaption = document.querySelector('.fancybox-caption');
+            fbToolbar = document.querySelector('.fancybox-toolbar');
+
+            fbContent.appendChild(fbCaption);
+            fbContent.appendChild(fbToolbar);
+            fbCaption.classList.add('fancybox-caption__moved');
+                    fbCaption.style.marginBottom = "-" + fbCaption.offsetHeight + "px";
+            $('.fancybox-content').off('click');
+            $('.fancybox-image').click(function(e) {
+                window.location.href = document.querySelector('.captionbutton').href;
+            });
+          },
         });
+      };
     })
-    </script>
+  </script>
 </div>

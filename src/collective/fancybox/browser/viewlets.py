@@ -43,7 +43,6 @@ class hasLightbox(object):
         if self._contextIsDestination():
             return False
 
-        enabled = self._showFirstTimeOrReturning()
         return enabled and self.lightbox
 
     def _contextIsDestination(self):
@@ -116,29 +115,3 @@ class hasLightbox(object):
     def _isEffective(self):
         lb = self.lightbox
         return lb.effective().isPast() and lb.expires().isFuture()
-
-    def _showFirstTimeOrReturning(self):
-        """ If there is a cookie, visitor has already seen the lightbox.
-            We assume first time visitor if there is no cookie.
-            In the latter case, set the cookie.
-            *Note to self*: this is called at least twice for each page load,
-            1. from the bundle expression='context/@@hasLightbox'
-            2. from the viewlet.
-        """
-        id = 'collective.fancybox.{}'.format(self.lightbox.id)
-        effective = self.lightbox.effective()
-        expires = self.lightbox.expires()
-        timestamp = str(effective.asdatetime().timestamp())
-        if (self.lightbox.lightbox_repeat != 'always'):
-            cookie = self.request.cookies.get(id)
-            if cookie == timestamp:
-                return False
-            else:
-                self.request.response.setCookie(
-                    id,
-                    timestamp,
-                    expires=expires.rfc822()
-                )
-                return True
-        else:
-            return True
