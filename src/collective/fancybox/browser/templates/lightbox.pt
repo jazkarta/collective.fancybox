@@ -2,7 +2,7 @@
   <div class="col-xs-12" tal:define="scale_func view/lightbox/@@images; scaled_image python: getattr(view.lightbox.aq_explicit, 'image', False) and scale_func.scale('image')">
     <a href="${scaled_image/url|nothing}"
       tal:attributes="
-        data-effective python: view.lightbox.effective().asdatetime().timestamp();
+        data-effective python: view.lightbox.effective().timeTime();
         data-expires python: view.lightbox.expires().rfc822();
       "
       data-lightbox-id="${view/lightbox/id}"
